@@ -1,6 +1,6 @@
 import os
-import yt_dlp
 import asyncio
+import yt_dlp
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from openai import OpenAI
@@ -12,39 +12,39 @@ TOKEN = os.environ.get("TOKEN")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 if not TOKEN:
-    raise ValueError("TOKEN missing")
+    raise ValueError("❌ TOKEN missing")
 
 if not OPENAI_API_KEY:
-    raise ValueError("OPENAI_API_KEY missing")
+    raise ValueError("❌ OPENAI_API_KEY missing")
 
+# OpenAI client
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # =========================
-# MEMORY (SIMPLE)
+# MEMORY (simple)
 # =========================
 users = set()
 
 # =========================
-# START
+# START COMMAND
 # =========================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     users.add(update.effective_user.id)
-
     await update.message.reply_text(
         "🔥 Welcome to Dillion\n\n"
-        "Send any link to download 🎥\n"
-        "Or chat with AI 🤖\n\n"
-        "/stats - user count"
+        "📥 Send any link to download\n"
+        "🤖 Or chat with AI\n\n"
+        "/stats - see users"
     )
 
 # =========================
-# STATS
+# STATS COMMAND
 # =========================
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"👥 Users: {len(users)}")
 
 # =========================
-# DOWNLOAD
+# DOWNLOAD FUNCTION
 # =========================
 def download_video(url):
     ydl_opts = {
@@ -64,7 +64,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     users.add(update.effective_user.id)
 
-    # LINK MODE
+    # DOWNLOAD MODE
     if "http" in text:
         await update.message.reply_text("⏳ Downloading...")
 
@@ -77,8 +77,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     os.remove(file)
                     break
 
-        except:
-            await update.message.reply_text("❌ Failed to download")
+        except Exception:
+            await update.message.reply_text("❌ Download failed")
 
     # AI MODE
     else:
@@ -94,7 +94,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply = response.choices[0].message.content
             await update.message.reply_text(reply)
 
-        except:
+        except Exception:
             await update.message.reply_text("⚠️ AI error")
 
 # =========================
@@ -106,5 +106,5 @@ app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("stats", stats))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-print("🚀 Dillion running...")
+print("🚀 Bot is running...")
 app.run_polling()
