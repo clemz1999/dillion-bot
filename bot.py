@@ -15,16 +15,13 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 users = set()
 
-# START
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     users.add(update.effective_user.id)
     await update.message.reply_text("🔥 Dillion Bot Active")
 
-# STATS
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"Users: {len(users)}")
 
-# DOWNLOAD
 def download_video(url):
     ydl_opts = {
         'outtmpl': 'video.%(ext)s',
@@ -34,7 +31,6 @@ def download_video(url):
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
-# MESSAGE
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     users.add(update.effective_user.id)
@@ -56,15 +52,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             response = client.chat.completions.create(
                 model="gpt-4.1-mini",
-                messages=[
-                    {"role": "user", "content": text}
-                ]
+                messages=[{"role": "user", "content": text}]
             )
             await update.message.reply_text(response.choices[0].message.content)
         except:
             await update.message.reply_text("AI error")
 
-# MAIN
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
